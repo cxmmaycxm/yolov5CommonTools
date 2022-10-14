@@ -3,7 +3,7 @@ import numpy as np
 import h5py
 
 if __name__ == '__main__':
-    file_path = '/media/cxm/PapersCode/datasets/UCF-QNRF/UCF-QNRF_ECCV18/train_data/Images/00_img_0001.h5'
+    file_path = '你h5文件的完整路径.h5'
     # HDF5的读取：
     f = h5py.File(file_path, 'r')  # 打开h5文件
     # 可以查看所有的主键

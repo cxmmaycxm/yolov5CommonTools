@@ -119,7 +119,7 @@ def open_save_labels(img_from_path, label_from_path, label_to_path, img_name):
 
 def main():
     #   路径设置
-    root_path = '/media/cxm/PapersCode/datasets/NWPU_Crowd_new'
+    root_path = '你数据集所在目录'
     img_from_path = f'{root_path}/images'
     label_from_path = f'{root_path}/jsons'
     label_to_path = f'{root_path}/labels'
