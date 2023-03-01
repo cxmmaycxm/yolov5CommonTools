@@ -1,3 +1,8 @@
+"""
+    实现效果：将txt格式的标签文件改成YOLOv5要求的形式，这里转换的是JHU++数据集，将越界的部分的x.y轴直接改成边界
+"""
+
+
 import os
 import cv2
 import numpy as np
@@ -23,13 +28,19 @@ def trans_labels2yolo(h_img, w_img, source_labels, format_source_labels, yolo_la
         [x, y, w, h, o, b] = label
         format_source_labels.append([x, y, w, h])
         #   将原标签转成yolo格式的标签
-        [yolo_x, yolo_y, yolo_w, yolo_h] = [x / w_img, y / h_img, w / w_img, h / h_img]
-        #   非法标签检测
-        for yolo_temp in [yolo_x, yolo_y, yolo_w, yolo_h]:
-            if yolo_temp > 1 or yolo_temp < 0:
-                print(f'{red_begin}{cycle}行：{color_end}source_labels:[{x}, {y}, {w}, {h}] ---> [{yolo_x}, {yolo_y}, {yolo_w}, {yolo_h}]')
-                break
+        yolo_list = [x / w_img, y / h_img, w / w_img, h / h_img]
+        #   非法标签检测，越界的用0或1代替
+        for i in range(len(yolo_list)):
+            if 0.0 > yolo_list[i]:
+                print(f'{red_begin}{cycle}行：{color_end}source_labels:[{x}, {y}, {w}, {h}] ---> {yolo_list}')
+                yolo_list[i] = 0.0
+                print(f'{red_begin}{cycle}行改后：{color_end}source_labels:[{x}, {y}, {w}, {h}] ---> {yolo_list}')
+            elif yolo_list[i] > 1.0:
+                print(f'{red_begin}{cycle}行：{color_end}source_labels:[{x}, {y}, {w}, {h}] ---> {yolo_list}')
+                yolo_list[i] = 1.0
+                print(f'{red_begin}{cycle}行改后：{color_end}source_labels:[{x}, {y}, {w}, {h}] ---> {yolo_list}')
         #   将yolo格式标签存进list
+        [yolo_x, yolo_y, yolo_w, yolo_h] = yolo_list
         yolo_labels.append(f'0 {yolo_x} {yolo_y} {yolo_w} {yolo_h}')
         cycle += 1
 
@@ -84,14 +95,14 @@ def open_save_labels(img_from_path, label_from_path, label_to_path, img_name):
     size = img.shape
     h_img, w_img = size[0], size[1]
     print(f'{green_begin}img size: {color_end} [{h_img}, {w_img}]')
-    # #   判断目标标签文件是否存在
-    # if os.path.isfile(label_to):
-    #     msg = f'{yellow_begin}warning：{color_end} {file_name}.txt 已完成标签转换'
-    #     print(msg)
-    #     error_list.append(msg)
-    # #   判断原标签文件是否存在
-    # elif os.path.isfile(label_from):
-    if os.path.isfile(label_from):
+    #   判断目标标签文件是否存在
+    if os.path.isfile(label_to):
+        msg = f'{yellow_begin}warning：{color_end} {file_name}.txt 已完成标签转换'
+        print(msg)
+        error_list.append(msg)
+    #   判断原标签文件是否存在
+    elif os.path.isfile(label_from):
+    # if os.path.isfile(label_from):
         #   读取标签文件，获取标签
         with open(label_from, 'r') as f:
             source_labels = f.readlines()
@@ -100,13 +111,13 @@ def open_save_labels(img_from_path, label_from_path, label_to_path, img_name):
         #   进行标签的转换
         trans_labels2yolo(h_img, w_img, source_labels, format_source_labels, yolo_labels)
         # show_img_boxes(img, yolo_labels)
-        show_img_boxes(img, format_source_labels, is_yolo=False)
-        # #   将转换好后的yolo格式标签存进文件里
-        # with open(label_to, 'w') as f:
-        #     for label_str in yolo_labels:
-        #         f.write(f'{label_str}\n')
-        #     print(f'--{file_name}.txt 写入成功')
-        #     f.close()
+        # show_img_boxes(img, format_source_labels, is_yolo=False)
+        #   将转换好后的yolo格式标签存进文件里
+        with open(label_to, 'w') as f:
+            for label_str in yolo_labels:
+                f.write(f'{label_str}\n')
+            print(f'--{file_name}.txt 写入成功')
+            f.close()
     else:
         msg = f'{red_begin}error：{color_end} {img_name} 无标签文件'
         print(msg)
@@ -115,30 +126,28 @@ def open_save_labels(img_from_path, label_from_path, label_to_path, img_name):
 
 def main():
     #   路径设置
-    root_path = '你数据集路径'
-    change_part = 'train'  # train/test/val
-    img_from_path = f'{root_path}/jhu_crowd_v2.0/{change_part}/images'
-    label_from_path = f'{root_path}/jhu_crowd_v2.0/{change_part}/gt'
-    label_to_path = f'{root_path}/jhu_crowd_v2.0_yolo/labels/{change_part}'
+    img_from_path = '待转化数据集图片路径'
+    label_from_path = '转换前标签路径'
+    label_to_path = '转换后标签存放路径'
 
     #   获取文件列表
     images = os.listdir(img_from_path)
     total = len(images)
     print(f'-- {blue_begin} the number of images : {color_end} {total}')
     print(f'-- images : {images} ')
-    open_save_labels(img_from_path, label_from_path, label_to_path, '0734.jpg')
-    # for img_name in images:
-    #     #   进行文件后缀的判断
-    #     suffix = img_name.split('.')[1]
-    #     if suffix == 'jpg' or suffix == 'png':
-    #         #   这边进行批量的文件转换，以下是单个文件的转换流程
-    #         open_save_labels(img_from_path, label_from_path, label_to_path, img_name)
-    # #   转换失败文件的输入
-    # print(f'--{green_begin}总文件数：{total}， 失败：{len(error_list)} {color_end}')
-    # if len(error_list) > 0:
-    #     print(f'{red_begin}失败列表：{color_end}')
-    #     for msg in error_list:
-    #         print(msg)
+    # open_save_labels(img_from_path, label_from_path, label_to_path, '0734.jpg')
+    for img_name in images:
+        #   进行文件后缀的判断
+        suffix = img_name.split('.')[1]
+        if suffix == 'jpg' or suffix == 'png':
+            #   这边进行批量的文件转换，以下是单个文件的转换流程
+            open_save_labels(img_from_path, label_from_path, label_to_path, img_name)
+    #   转换失败文件的输入
+    print(f'--{green_begin}总文件数：{total}， 失败：{len(error_list)} {color_end}')
+    if len(error_list) > 0:
+        print(f'{red_begin}失败列表：{color_end}')
+        for msg in error_list:
+            print(msg)
 
 
 if __name__ == '__main__':
