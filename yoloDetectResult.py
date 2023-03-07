@@ -36,17 +36,16 @@ def get_file_name(path):
     return file_name
 
 
-#   获取所有检测图片的名字
-def get_img_name(path):
-    images = get_file_name(path)
-    suffixs = ['jpg', 'png', 'jpeg', 'gif', 'bmp']
-    #   整理图片文件，删除后缀
-    imgs = [img.split('.')[0] for img in images if img.split('.')[1] in suffixs]
+#   获取所有检测文件的名字
+def get_files_name(path, file_suffixs):
+    files = get_file_name(path)
+    #   整理文件，删除后缀
+    files = [file.split('.')[0] for file in files if file.split('.')[1] in file_suffixs]
     #   将图片按名字排好序
-    imgs.sort()
-    print(f'-- {blue_begin} the number of images : {color_end} {len(imgs)}')
-    print(f'-- images : {imgs} ')
-    return imgs
+    files.sort()
+    print(f'-- {blue_begin} the number of files : {color_end} {len(files)}')
+    print(f'-- files : {files} ')
+    return files
 
 
 def get_labels(path, imgs_name):
@@ -78,19 +77,32 @@ def save_labels(path, labels):
     save_file(path, content)
 
 
+def detect_result(file_from_path, file_suffixs, label_from_path, label_to_path, result_save_file):
+    #   获取所有检测文件的名字
+    files_name = get_files_name(file_from_path, file_suffixs)
+    #   读取检测结果
+    labels = get_labels(label_from_path, files_name)
+    #   保存检测结果
+    save_labels(f'{label_to_path}/{result_save_file}', labels)
+    return files_name, labels
+
+
+def get_detect_result(file_from_path, file_suffixs, label_from_path, label_to_path, result_save_file):
+    #   获取所有检测文件的名字
+    files_name = get_files_name(file_from_path, file_suffixs)
+    #   读取检测结果
+    labels = get_labels(label_from_path, files_name)
+    return files_name, labels
+
 #   入口函数
 def main():
     #   路径设置
-    detect_result_save_file = 'detectResult.txt'
+    result_save_file = 'detectResult.txt'
     img_from_path = '检测图片的路径'
     label_from_path = f'检测结果标签存放路径'
     label_to_path = f'最后结果文件存放处'
-    #   获取所有检测图片的名字
-    imgs_name = get_img_name(img_from_path)
-    #   读取检测结果
-    labels = get_labels(label_from_path, imgs_name)
-    #   保存检测结果
-    save_labels(f'{label_to_path}/{detect_result_save_file}', labels)
+    suffixs = ['jpg', 'png', 'jpeg', 'gif', 'bmp']  # 待检测文件的后缀list
+    detect_result(img_from_path, suffixs, label_from_path, label_to_path, result_save_file)
 
 
 #   测试性能专用函数
