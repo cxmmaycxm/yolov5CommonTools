@@ -126,22 +126,22 @@ def create_maps(imgs_from_path, labels_from_path, density_imgs_to_path, is_mat=F
 def create_map(img_from_path, label_from_path, density_img_to_path, is_mat=False):
     # 判断文件是否存在
     if not os.path.exists(img_from_path):
-        err_msg = f'{red_begin}error:{color_end}{img_from_path} is not exist'
-        print(err_msg)
+        err_msg = f'{img_from_path} is not exist'
+        print(f'{red_begin}error:{color_end}{err_msg}')
         error_list.append(err_msg)
     elif not os.path.exists(label_from_path):
-        err_msg = f'{red_begin}error:{color_end}{label_from_path} is not exist'
-        print(err_msg)
+        err_msg = f'{label_from_path} is not exist'
+        print(f'{red_begin}error:{color_end}{err_msg}')
         error_list.append(err_msg)
     elif os.path.exists(density_img_to_path):
-        warning_msg = f'{yellow_begin}warning:{color_end}{density_img_to_path} is exist'
-        print(warning_msg)
-        warning_msg.append(warning_msg)
+        warning_msg = f'{density_img_to_path} is exist'
+        print(f'{yellow_begin}warning:{color_end}{warning_msg}')
+        warning_list.append(warning_msg)
     else:
         print(f'{green_begin}begin create density map : {color_end} {density_img_to_path}')
         # 通过mat或txt中的人头标签进行密度图生成
-        den_map = create_density_mat(img_from_path, label_from_path) if is_mat else create_density_txt(img_from_path,
-                                                                                                       label_from_path)
+        den_map = create_density_mat(img_from_path, label_from_path) if is_mat else create_density_txt(img_from_path,label_from_path)
+
         # 密度图展示和保存
         plt.figure(2)
         plt.imshow(den_map, cmap=CM.jet)
