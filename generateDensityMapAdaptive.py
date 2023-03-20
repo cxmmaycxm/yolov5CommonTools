@@ -111,19 +111,23 @@ def create_maps(imgs_from_path, labels_from_path, density_imgs_to_path, is_mat=F
     files_name = [img.split('.')[0] for img in imgs]
     img_suffix = imgs[0].split('.')[1]
     suffix = 'mat' if is_mat else 'txt'
+    combine_dens_imgs_to_path = f'{density_imgs_to_path}/combine'
 
     if not os.path.exists(density_imgs_to_path):
         os.mkdir(density_imgs_to_path)
+    if not os.path.exists(combine_dens_imgs_to_path):
+        os.mkdir(combine_dens_imgs_to_path)
 
     for file_name in files_name:
         img_from_path = f'{imgs_from_path}/{file_name}.{img_suffix}'
         label_from_path = f'{labels_from_path}/{file_name}.{suffix}'
         density_img_to_path = f'{density_imgs_to_path}/{file_name}_density.jpg'
-        create_map(img_from_path, label_from_path, density_img_to_path, is_mat)
+        combine_den_img_to_path = f'{combine_dens_imgs_to_path}/{file_name}_density.jpg'
+        create_map(img_from_path, label_from_path, density_img_to_path, combine_den_img_to_path, is_mat)
 
 
 # 创建单张密度图
-def create_map(img_from_path, label_from_path, density_img_to_path, is_mat=False):
+def create_map(img_from_path, label_from_path, density_img_to_path, combine_den_img_to_path, is_mat=False):
     # 判断文件是否存在
     if not os.path.exists(img_from_path):
         err_msg = f'{img_from_path} is not exist'
@@ -145,16 +149,27 @@ def create_map(img_from_path, label_from_path, density_img_to_path, is_mat=False
         # 密度图展示和保存
         plt.figure(2)
         plt.imshow(den_map, cmap=CM.jet)
-        plt.savefig(density_img_to_path)
+        plt.axis('off')
+        plt.savefig(density_img_to_path, bbox_inches='tight', pad_inches=0)
         # plt.show()
+
+        # 将密度图和原图融合保存
+        heatmap = cv2.imread(density_img_to_path)
+        img = cv2.imread(img_from_path)
+
+        combine = cv2.addWeighted(cv2.resize(heatmap, (img.shape[1], img.shape[0])), 0.5, img, 0.5, 0)
+        cv2.imwrite(combine_den_img_to_path, combine)
+        # cv2.imshow('1', combine)
+        # cv2.waitKey(0)
 
 
 if __name__ == '__main__':
     txts_from_path = f"../labels"  # 待检测图片标签文件路径(txt/mat)
-    imgs_from_path = f"../jhu_crowd_v2.0_yolo/images/exp}"  # 待检测图片路径
+    imgs_from_path = f"../jhu_crowd_v2.0_yolo/images/exp"  # 待检测图片路径
     density_imgs_to_path = f"../density_imgs"  # 密度图存放路径
+    combine_den_img_to_path = f'{density_imgs_to_path}/combine' # 存放密度图和原图融合的新图的地方
 
-    # create_map(img_from_path, txt_from_path, density_img_to_path, is_mat=False)
+    # create_map(img_from_path, txt_from_path, density_img_to_path, combine_den_img_to_path, is_mat=False)
     create_maps(imgs_from_path, txts_from_path, density_imgs_to_path, is_mat=False)  # is_mat:标签文件 is mat/txt文件
 
     print(f'{yellow_begin}warning message list{color_end}')
