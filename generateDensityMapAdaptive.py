@@ -164,13 +164,14 @@ def create_map(img_from_path, label_from_path, density_img_to_path, combine_den_
 
 
 if __name__ == '__main__':
+    is_mat = False
     txts_from_path = f"../labels"  # 待检测图片标签文件路径(txt/mat)
     imgs_from_path = f"../jhu_crowd_v2.0_yolo/images/exp"  # 待检测图片路径
     density_imgs_to_path = f"../density_imgs"  # 密度图存放路径
     combine_den_img_to_path = f'{density_imgs_to_path}/combine' # 存放密度图和原图融合的新图的地方
 
     # create_map(img_from_path, txt_from_path, density_img_to_path, combine_den_img_to_path, is_mat=False)
-    create_maps(imgs_from_path, txts_from_path, density_imgs_to_path, is_mat=False)  # is_mat:标签文件 is mat/txt文件
+    create_maps(imgs_from_path, txts_from_path, density_imgs_to_path, is_mat)  # is_mat:标签文件 is mat/txt文件
 
     print(f'{yellow_begin}warning message list{color_end}')
     print(warning_list)
