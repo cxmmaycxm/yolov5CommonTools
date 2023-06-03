@@ -6,5 +6,6 @@
  generateDensityMap.py：根据标签文件生成密度图  
  generateDensityMapAdaptive.py：使用自适应高斯卷积核，根据标签文件生成密度图并保存；融合密度图和原图生成新图以便展示；  
  calculateMaeMse.py：计算MAE和MSE  
+ getInfFormLog.py：从CLTR的log中提取mae/mse/loss的变化曲线
  
  
